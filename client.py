@@ -1,10 +1,8 @@
-import socket
 from datetime import datetime
 import math
 
-from config import PORT
-TIMEOUT = 1.0
-PING_NUM = 10
+from engine import *
+from config import DEFAULT_ADDRESS, TIMEOUT, PING_NUM
 
 
 class Data:
@@ -36,16 +34,15 @@ class Data:
 
 data = Data()
 
-client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-client.settimeout(TIMEOUT)
-
 for num in range(1, PING_NUM + 1):
+    client = start_client(TIMEOUT)
+
     send_time = datetime.now()
     message = 'Ping #' + str(num) + ', time: ' + send_time.strftime('%H:%M:%S.%f')
-    client.sendto(message.encode('ascii'), ('127.0.0.1', PORT))
+    use_send(client, message.encode('ascii'), DEFAULT_ADDRESS)
 
     try:
-        message, _ = client.recvfrom(1024)
+        message, _ = use_recv(client)
         get_time = datetime.now()
         print(message.decode('ascii'))
         data.got_update((get_time - send_time).microseconds)
